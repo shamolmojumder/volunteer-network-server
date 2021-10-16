@@ -3,6 +3,7 @@ const app = express();
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const { MongoClient } = require('mongodb');
+const ObjectID=require('mongodb').ObjectId
 require('dotenv').config();
 const port = process.env.PORT || 5055;
 
@@ -21,6 +22,15 @@ client.connect(err => {
   console.log("err",err);
   const eventCollection = client.db("volunteer").collection("events");
 
+  app.get('/events',(req,res)=>{
+    eventCollection.find()
+    .toArray((err,items)=>{
+      res.send(items)
+    })
+    
+  })
+
+
   app.post('/addEvent',(req,res)=>{
     const newEvent=req.body;
     console.log('adding new event: ',newEvent);
@@ -31,6 +41,12 @@ client.connect(err => {
     })
   })
 
+  app.delete('deleteEvent/:id',(req,res)=>{
+    const id=ObjectID(req.params)
+    console.log("delete this",id);
+    eventCollection.findOneAndDelete({_id:id})
+    .then(documents=>res.send(!!documents.value))
+  })
 
   // client.close();
   
